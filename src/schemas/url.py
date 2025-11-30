@@ -42,3 +42,18 @@ class URLResponse(URLBase):
     error_message: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+
+class URLBatchCreate(BaseModel):
+    """Schema for batch creating URLs."""
+
+    urls: list[URLCreate] = Field(..., min_length=1, max_length=100, description="List of URLs to add (max 100)")
+
+
+class URLBatchResponse(BaseModel):
+    """Schema for batch operation response."""
+
+    added: int = Field(..., description="Number of URLs added")
+    skipped: int = Field(..., description="Number of URLs skipped (already exist)")
+    total: int = Field(..., description="Total URLs processed")
+    sample_added: list[str] = Field(default_factory=list, description="Sample of added URLs (first 5)")

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.database import get_db
 from src.models.url import URLStatus
-from src.schemas.url import URLCreate, URLResponse
+from src.schemas.url import URLBatchCreate, URLBatchResponse, URLCreate, URLResponse
 from src.services.frontier import FrontierService
 
 router = APIRouter()
@@ -224,6 +224,54 @@ async def mark_as_failed(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
         )
+
+
+@router.post("/urls/batch", response_model=URLBatchResponse)
+async def add_urls_batch(
+    batch_data: URLBatchCreate,
+    service: Annotated[FrontierService, Depends(get_frontier_service)],
+) -> URLBatchResponse:
+    """
+    Add multiple URLs to the frontier in batch.
+
+    Efficiently adds multiple URLs at once. Skips URLs that already exist.
+    Maximum 100 URLs per request.
+
+    Args:
+        batch_data: Batch of URLs to add
+        service: Frontier service
+
+    Returns:
+        Batch operation result with counts
+    """
+    from src.models.url import URL
+
+    added_urls = []
+    skipped_count = 0
+
+    for url_data in batch_data.urls:
+        # Check if URL already exists
+        existing_url = service.db.query(URL).filter(URL.url == url_data.url).first()
+
+        if existing_url:
+            skipped_count += 1
+            continue
+
+        # Add new URL
+        try:
+            url = service.add_url(url_data)
+            added_urls.append(url.url)
+        except Exception:
+            # Skip URLs that fail validation or insertion
+            skipped_count += 1
+            continue
+
+    return URLBatchResponse(
+        added=len(added_urls),
+        skipped=skipped_count,
+        total=len(batch_data.urls),
+        sample_added=added_urls[:5],  # Return first 5 as sample
+    )
 
 
 @router.get("/stats")
