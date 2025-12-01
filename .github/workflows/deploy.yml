@@ -56,7 +56,7 @@ jobs:
     - name: Deploy to Hetzner
       uses: appleboy/ssh-action@v1.0.0
       env:
-        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         host: ${{ secrets.DEPLOY_HOST }}
         username: ${{ secrets.DEPLOY_USER }}
@@ -65,7 +65,7 @@ jobs:
         script: |
           cd /home/lookuply/lookuply/infrastructure
           git pull origin main
-          printf '%s\n' "$GHCR_TOKEN" | docker login ghcr.io -u lookuply --password-stdin 2>&1
+          printf '%s\n' "$GHCR_TOKEN" | docker login ghcr.io -u ${{ github.actor }} --password-stdin 2>&1
           docker compose pull coordinator
           docker compose up -d coordinator
           docker compose ps
