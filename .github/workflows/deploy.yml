@@ -65,7 +65,7 @@ jobs:
         script: |
           cd /home/lookuply/lookuply/infrastructure
           git pull origin main
-          echo $GHCR_TOKEN | docker login ghcr.io -u lookuply --password-stdin
+          printf '%s\n' "$GHCR_TOKEN" | docker login ghcr.io -u lookuply --password-stdin 2>&1
           docker compose pull coordinator
           docker compose up -d coordinator
           docker compose ps
