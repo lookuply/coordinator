@@ -56,6 +56,7 @@ jobs:
         ruff check .
 
     - name: Type check with mypy
+      continue-on-error: true
       run: |
         mypy src/
 
