@@ -44,10 +44,6 @@ async def add_url(
     Returns:
         URL object and status code
     """
-    from datetime import datetime, timezone
-    from fastapi import Response
-    from fastapi.responses import JSONResponse
-
     # Check if URL already exists
     from src.models.url import URL
     existing_url = service.db.query(URL).filter(URL.url == url_data.url).first()
