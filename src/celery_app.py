@@ -26,11 +26,11 @@ celery_app.conf.update(
     worker_max_tasks_per_child=1000,  # Restart worker after 1000 tasks
 )
 
-# Task routes (optional - for multiple queues)
-celery_app.conf.task_routes = {
-    "src.tasks.crawl.*": {"queue": "crawl"},
-    "src.tasks.index.*": {"queue": "index"},
-}
+# Task routes disabled - all tasks go to default "celery" queue
+# celery_app.conf.task_routes = {
+#     "src.tasks.crawl.*": {"queue": "crawl"},
+#     "src.tasks.index.*": {"queue": "index"},
+# }
 
 # Celery beat schedule (periodic tasks)
 celery_app.conf.beat_schedule = {
