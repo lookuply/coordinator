@@ -3,7 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api import urls
+from src.api import content, urls
 from src.config import settings
 
 app = FastAPI(
@@ -25,6 +25,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(urls.router, prefix="/api/v1", tags=["urls"])
+app.include_router(content.router, prefix="/api/v1/content", tags=["content"])
 
 
 @app.get("/health")

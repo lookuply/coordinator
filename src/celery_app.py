@@ -9,7 +9,7 @@ celery_app = Celery(
     "coordinator",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["src.tasks.crawl"],  # Import task modules
+    include=["src.tasks.crawl", "src.tasks.index"],  # Import task modules
 )
 
 # Celery configuration

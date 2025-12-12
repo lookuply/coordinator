@@ -6,6 +6,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from sqlalchemy import Column, DateTime, Enum, Integer, String, Text
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from src.database import Base
@@ -55,6 +56,9 @@ class URL(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
+    # Relationship to CrawledPage
+    crawled_page = relationship("CrawledPage", back_populates="url", uselist=False)
 
     def __init__(self, **kwargs):  # type: ignore
         """Initialize URL and extract domain."""
