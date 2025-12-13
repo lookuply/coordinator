@@ -9,11 +9,12 @@ from pydantic import BaseModel, Field
 class ContentSubmission(BaseModel):
     """Schema for submitting crawled page content."""
 
-    title: Optional[str] = Field(None, max_length=500, description="Page title")
+    title: Optional[str] = Field(None, max_length=2000, description="Page title")
     content: str = Field(..., min_length=50, description="Main text content")
     language: Optional[str] = Field(None, max_length=10, description="Language code (e.g., 'en', 'sk')")
     author: Optional[str] = Field(None, max_length=255, description="Author name")
-    date: Optional[datetime] = Field(None, description="Publication date")
+    # Accept date as optional string - will be converted in the service layer
+    date: Optional[str] = Field(None, description="Publication date (YYYY-MM-DD or ISO format)")
 
 
 class ContentResponse(BaseModel):

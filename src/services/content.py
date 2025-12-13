@@ -6,7 +6,7 @@ Follows SOLID principles:
 - Dependency Inversion: Depends on Session abstraction
 """
 
-from datetime import datetime, timezone
+from datetime import date as date_type, datetime, timezone
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -39,7 +39,7 @@ class ContentService:
         content: str,
         language: Optional[str],
         author: Optional[str] = None,
-        date: Optional[datetime] = None,
+        date: Optional[str] = None,
     ) -> CrawledPage:
         """
         Store crawled page content.
@@ -75,6 +75,21 @@ class ContentService:
         if url.status not in [URLStatus.COMPLETED, URLStatus.CRAWLING]:
             raise ValueError(f"URL {url_id} has status {url.status.value}, expected COMPLETED or CRAWLING")
 
+        # Parse date string to datetime if provided
+        parsed_date: Optional[datetime] = None
+        if date:
+            try:
+                # Try parsing as full datetime first
+                parsed_date = datetime.fromisoformat(date.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                # Try parsing as date-only (YYYY-MM-DD)
+                try:
+                    date_obj = date_type.fromisoformat(date)
+                    parsed_date = datetime.combine(date_obj, datetime.min.time())
+                except (ValueError, AttributeError):
+                    # If parsing fails, leave as None
+                    parsed_date = None
+
         # Check if content already exists
         existing = self.db.query(CrawledPage).filter(CrawledPage.url_id == url_id).first()
         if existing:
@@ -83,7 +98,7 @@ class ContentService:
             existing.content = content
             existing.language = language
             existing.author = author
-            existing.date = date
+            existing.date = parsed_date
             existing.updated_at = datetime.now(timezone.utc)
             self.db.commit()
             self.db.refresh(existing)
@@ -96,7 +111,7 @@ class ContentService:
             content=content,
             language=language,
             author=author,
-            date=date,
+            date=parsed_date,
         )
         self.db.add(page)
         self.db.commit()

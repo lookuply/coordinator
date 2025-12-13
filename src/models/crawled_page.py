@@ -22,7 +22,7 @@ class CrawledPage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     url_id = Column(Integer, ForeignKey("urls.id", ondelete="CASCADE"), unique=True, nullable=False)
-    title = Column(String(500), nullable=True)
+    title = Column(String(2000), nullable=True)
     content = Column(Text, nullable=False)
     language = Column(String(10), nullable=True)
     author = Column(String(255), nullable=True)
