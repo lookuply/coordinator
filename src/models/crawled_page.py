@@ -14,6 +14,7 @@ class CrawledPage(Base):
     Crawled page content.
 
     Stores extracted content from successfully crawled pages.
+    Includes AI evaluation workflow fields.
     Indexed to Meilisearch via Celery task.
     Follows Single Responsibility Principle - only manages page content storage.
     """
@@ -29,6 +30,23 @@ class CrawledPage(Base):
     date = Column(DateTime(timezone=True), nullable=True)
     indexed = Column(Boolean, default=False, nullable=False, index=True)
     indexed_at = Column(DateTime(timezone=True), nullable=True)
+
+    # AI Evaluation fields
+    ai_score = Column(Integer, nullable=True, index=True)  # 0-100 quality score
+    summary = Column(Text, nullable=True)  # 2-3 sentence AI-generated summary
+    evaluation_status = Column(
+        String(20),
+        default="pending",
+        nullable=False,
+        index=True
+    )  # pending, processing, evaluated, failed
+    evaluated_at = Column(DateTime(timezone=True), nullable=True)
+    evaluation_error = Column(Text, nullable=True)  # Error message if evaluation failed
+
+    # Crawl depth tracking
+    depth = Column(Integer, default=0, nullable=False, index=True)
+    parent_url_id = Column(Integer, ForeignKey("urls.id", ondelete="SET NULL"), nullable=True)
+
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -41,8 +59,9 @@ class CrawledPage(Base):
         nullable=False,
     )
 
-    # Relationship to URL
-    url = relationship("URL", back_populates="crawled_page")
+    # Relationships
+    url = relationship("URL", back_populates="crawled_page", foreign_keys=[url_id])
+    parent_url = relationship("URL", foreign_keys=[parent_url_id])
 
     def __repr__(self) -> str:
         """String representation of CrawledPage."""

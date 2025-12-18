@@ -7,7 +7,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from src.api import content, urls
+from src.api import content, tasks, urls
 from src.config import settings
 
 logger = logging.getLogger(__name__)
@@ -65,6 +65,7 @@ async def log_validation_errors(request: Request, call_next):
 # Include routers
 app.include_router(urls.router, prefix="/api/v1", tags=["urls"])
 app.include_router(content.router, prefix="/api/v1/content", tags=["content"])
+app.include_router(tasks.router, prefix="/api/v1", tags=["tasks"])
 
 
 @app.get("/health")
